@@ -78,7 +78,7 @@
                 android:layout_height="wrap_content"
                 android:text="Login"
                 android:onClick="onBtnLoginClicked"
-                />
+            />
 
         </LinearLayout>
 

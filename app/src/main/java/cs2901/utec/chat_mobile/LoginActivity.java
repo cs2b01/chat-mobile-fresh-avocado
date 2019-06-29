@@ -1,5 +1,6 @@
 package cs2901.utec.chat_mobile;
 
+import android.app.Activity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.EditText;
@@ -26,11 +27,15 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_login); // activity_login will be related to the content view
     }
 
     public void showMessage(String message) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
+
+    public Activity getActivity() {
+        return this;
     }
 
     public void onBtnLoginClicked(View view) {
@@ -51,28 +56,32 @@ public class LoginActivity extends AppCompatActivity {
         // 4. Sending json message to Server
         JsonObjectRequest request = new JsonObjectRequest(
             Request.Method.POST,
-            "http://10.0.2.2:8080/authenticate",
+           "http://10.0.2.2:8080/authenticate",
             jsonMessage,
-            new Response.Listener<JSONObject>() {
+            new Response.Listener<JSONObject>() { // que voy a hacer cuando responda bien
                 @Override
                 public void onResponse(JSONObject response) {
-                    //TODO
+                    // TODO
                     try {
                         String message = response.getString("message");
-                        if(message.equals("Authorized")) {
+                        String username = response.getString("user"); // logged user username
+                        if (message.equals("Authorized")) {
                             showMessage("Authenticated");
+                            Intent intent = new Intent(getActivity(), ContactsActivity.class);
+                            intent.putExtra("username", username);
+                            startActivity(intent);
                         }
                         else {
                             showMessage("Wrong username or password");
                         }
                         showMessage(response.toString());
-                    }catch (Exception e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                         showMessage(e.getMessage());
                     }
                 }
             },
-            new Response.ErrorListener() {
+            new Response.ErrorListener() { // que voy a hacer cuando responda mal
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     error.printStackTrace();
@@ -85,9 +94,28 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         );
-
-        RequestQueue queue = Volley.newRequestQueue(this);
-        queue.add(request);
+        /// sin este paso, el request no se envía:
+        RequestQueue queue = Volley.newRequestQueue(this); // crea una cola de requests
+        queue.add(request); // anade el request a la cola de requests
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

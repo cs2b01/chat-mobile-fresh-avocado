@@ -5,8 +5,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.android.volley.AuthFailureError;
@@ -65,10 +69,16 @@ public class LoginActivity extends AppCompatActivity {
                     try {
                         String message = response.getString("message");
                         String username = response.getString("user"); // logged user username
+                        JSONArray contacts = response.getJSONArray("contacts");
                         if (message.equals("Authorized")) {
                             showMessage("Authenticated");
                             Intent intent = new Intent(getActivity(), ContactsActivity.class);
                             intent.putExtra("username", username);
+                            ArrayList<String> list = new ArrayList<>();
+                            for (int i = 0; i < contacts.length(); i++) {
+                                list.add(contacts.getString(i));
+                            }
+                            intent.putExtra("contacts", list);
                             startActivity(intent);
                         }
                         else {

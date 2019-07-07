@@ -5,12 +5,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.android.volley.AuthFailureError;
@@ -31,14 +27,14 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login); // activity_login will be related to the content view
+        setContentView(R.layout.activity_login);
     }
 
     public void showMessage(String message) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
-    public Activity getActivity() {
+    public Activity getActivity(){
         return this;
     }
 
@@ -60,38 +56,32 @@ public class LoginActivity extends AppCompatActivity {
         // 4. Sending json message to Server
         JsonObjectRequest request = new JsonObjectRequest(
             Request.Method.POST,
-           "http://10.0.2.2:8080/authenticate",
+            "http://10.0.2.2:8080/authenticate",
             jsonMessage,
-            new Response.Listener<JSONObject>() { // que voy a hacer cuando responda bien
+            new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject response) {
-                    // TODO
+                    //TODO
                     try {
                         String message = response.getString("message");
-                        String username = response.getString("user"); // logged user username
-                        JSONArray contacts = response.getJSONArray("contacts");
-                        if (message.equals("Authorized")) {
+                        if(message.equals("Authorized")) {
                             showMessage("Authenticated");
                             Intent intent = new Intent(getActivity(), ContactsActivity.class);
-                            intent.putExtra("username", username);
-                            ArrayList<String> list = new ArrayList<>();
-                            for (int i = 0; i < contacts.length(); i++) {
-                                list.add(contacts.getString(i));
-                            }
-                            intent.putExtra("contacts", list);
+                            intent.putExtra("user_id", response.getInt("user_id"));
+                            intent.putExtra("username", response.getString("username"));
                             startActivity(intent);
                         }
                         else {
                             showMessage("Wrong username or password");
                         }
                         showMessage(response.toString());
-                    } catch (Exception e) {
+                    }catch (Exception e) {
                         e.printStackTrace();
                         showMessage(e.getMessage());
                     }
                 }
             },
-            new Response.ErrorListener() { // que voy a hacer cuando responda mal
+            new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     error.printStackTrace();
@@ -104,28 +94,9 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         );
-        /// sin este paso, el request no se envía:
-        RequestQueue queue = Volley.newRequestQueue(this); // crea una cola de requests
-        queue.add(request); // anade el request a la cola de requests
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        queue.add(request);
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

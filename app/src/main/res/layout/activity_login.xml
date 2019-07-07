@@ -29,7 +29,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="201710406 - Gabriel Spranger"/>
+                android:text="201710406 - Gabriel Spranger Rojas"/>
 
         </LinearLayout>
 
@@ -78,7 +78,7 @@
                 android:layout_height="wrap_content"
                 android:text="Login"
                 android:onClick="onBtnLoginClicked"
-            />
+                />
 
         </LinearLayout>
 

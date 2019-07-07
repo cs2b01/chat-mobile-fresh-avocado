@@ -1,57 +1,82 @@
 package cs2901.utec.chat_mobile;
 
-
+import android.app.Activity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 
-import android.widget.Toast;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import android.view.Gravity;
-import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-
-
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ContactsActivity extends AppCompatActivity {
 
-    public void showMessage(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-    }
+    RecyclerView mRecyclerView;
+    RecyclerView.Adapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contacts);
+        mRecyclerView = findViewById(R.id.main_recycler_view);
+        setTitle("@"+getIntent().getExtras().get("username").toString());
+    }
 
-        TextView contactsActivityTitle = (TextView)findViewById(R.id.contactsActivityTitle);
-        String username = getIntent().getStringExtra("username");
-        String title = username + "'s contacts";
-        contactsActivityTitle.setText(title);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        getUsers();
+    }
 
-        ArrayList<String> contacts = getIntent().getStringArrayListExtra("contacts");
+    public Activity getActivity() {
+        return this;
+    }
 
-        View contactsLayout = findViewById(R.id.contacts);
+    public void getUsers() {
+        String url = "http://10.0.2.2:8080/users";
+        RequestQueue queue = Volley.newRequestQueue(this);
+        Map<String, String> params = new HashMap();
+        JSONObject parameters = new JSONObject(params);
+        final String userId = getIntent().getExtras().get("user_id").toString();
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                Request.Method.GET,
+                url,
+                parameters,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            JSONArray data = response.getJSONArray("contacts"); // get the contacts array from the server
+                            mAdapter = new ChatAdapter(data, getActivity(), userId); // set those contacts as the data for the adapter
+                            mRecyclerView.setAdapter(mAdapter); // set this adapter to the recycler view
 
-        for (int i = 0; i < contacts.size(); i++) {
-            final TextView contact = new TextView(this);
-            contact.setText(contacts.get(i));
-            contact.setTextSize(30);
-            contact.setGravity(Gravity.CENTER);
-            contact.setClickable(true);
-            contact.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    TextView contactClicked = (TextView) view;
-                    CharSequence content = contact.getText();
-                    showMessage("Clicked on " + content);
-                }
-            });
-            contact.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-            ((LinearLayout) contactsLayout).addView(contact);
-        }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                // TODO: Handle error
+                error.printStackTrace();
+
+            }
+        });
+        queue.add(jsonObjectRequest);
+
     }
 
 }
